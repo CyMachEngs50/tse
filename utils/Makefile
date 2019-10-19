@@ -1,7 +1,7 @@
-CFLAGS: -Wall-pedantic-std=c11-|.-g
+CFLAGS= -Wall-pedantic-std=c11-|.-g
 OFILES=queue.o hash.o webpage.o
 
-all:	$(OFILES)
+all:	$(OFILES) 
 	ar cr ~/engs50/tse/lib/libutils.a $(OFILES)
 
 %.o:	%.c %.h
