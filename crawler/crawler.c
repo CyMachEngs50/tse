@@ -12,7 +12,7 @@
 
 FILE *fp;
 char *urlp = "https://thayer.github.io/engs50/";
-webpage_t *webpage1, *webpage2, *webpage3;
+webpage_t *seedURLpage, *webpage2, *webpage3;
 int pos=0;
 char *result;
 queue_t *qp;
@@ -24,7 +24,7 @@ int res;
 int idx=1;
 int depth = 0;
 bool fetched;
-
+char *URLfromqueue;
 
 int32_t pagesave(webpage_t *pagep,int id, char *dirname);
 
@@ -54,63 +54,64 @@ int main(int argc, char *argv[]){
     exit (EXIT_FAILURE);
   }
 
-  
-  printf("hello\n");
-  qp = qopen();
+	qp = qopen();
   hp = hopen(100); 
-  webpage1 = webpage_new(argv[1], depth, NULL);
+  seedURLpage = webpage_new(argv[1], depth, NULL);
   int32_t p= qput(qp, (void*)argv[1]);
-  int32_t p2= hput(hp, (void*)webpage1, argv[1], sizeof(argv[1]));
+  int32_t p2= hput(hp, (void*)seedURLpage, argv[1], sizeof(argv[1]));
   
-  if (argv[3] ==0){
-  fetched = webpage_fetch(webpage1);		      			       
-  pagesave(webpage1, idx, argv[2]);
+  /*if (argv[3] ==0){
+  fetched = webpage_fetch(seedURLpage);		      			       
+  pagesave(seedURLpage, idx, argv[2]);
+  }*/
+	URLfromqueue = (char*)qget(qp); 
+	while (URLfromqueue != NULL){
+		webpage2 = webpage_new(URLfromqueue,depth , NULL);
+		fetched = webpage_fetch(webpage2);
+		pagesave(webpage2, idx, argv[2]);
+		idx++;
+		printf (" %d \n", depth);
+		if (depth < atoi(argv[3])){
+			depth = depth + 1;
+			pos = 0;
+			while((pos = webpage_getNextURL(webpage2, pos, &result)) > 0){
+				if(IsInternalURL(result)){
+					found = hsearch(hp, searchfn, result, sizeof(result)); 
+					 if(found == NULL){  
+						 printf("internal url: %s\n", result);
+						 webpage3 = webpage_new(result, depth , NULL);
+						 fetched = webpage_fetch(webpage3);
+						 counter++;
+						 pagesave(webpage3, idx, argv[2]);
+						 int32_t p= qput(qp, (void*)result);
+						 int32_t p2= hput(hp, (void*)webpage3, result, sizeof(result));
+						 free(p);
+						 free(p2);
+						 						 result = NULL;
+					 }
+				}
+				else{
+					printf("external url: %s\n", result);
+					free (result);
+				}
+			}
+		}
+		
+		/*printf("The urls that are in the queue: \n");
+		while(counter > 0){
+			printf("in queue: %s\n", (char*) qget(qp));
+			counter= counter -1;
+			}*/
+	 
+		URLfromqueue = (char*)qget(qp);
+		printf("url from queue: %s\n", URLfromqueue);
+		counter= counter -1;
   }
-
-  else{
- 
-    while (depth < atoi(argv[3])){
-      webpage2 = webpage_new((char*)qget(qp),depth , NULL);
-      fetched = webpage_fetch(webpage2);
-      
-      depth++;
-      
-      while((pos = webpage_getNextURL(webpage2, pos, &result))>=0){
-	if(IsInternalURL(result)){
-	  printf("internal url: %s\n", result);
-	  webpage3 = webpage_new(result, depth , NULL);
-	  fetched = webpage_fetch(webpage3);
-	  found = hsearch(hp, searchfn, result, sizeof(result));
-	  if(found == NULL){
-	    idx++;
-	    pagesave(webpage3, idx, argv[2]);
-	    int32_t p= qput(qp, (void*)result);
-	    counter++;
-	    int32_t p2= hput(hp, (void*)webpage3, result, sizeof(result));
-	    free(p);
-	    free(p2);
-	    //free(result);
-	  }
-	}
-      
-	else{
-	  printf("external url: %s\n", result);
-	  free (result);
-	}
-      }
-    }
-  }
-  
-  printf("The urls that were added to the queue: \n");
-  while(counter >= 0){
-    printf("in queue: %s\n", (char*) qget(qp));
-    counter= counter -1;
-  }
-  
+	
   qclose(qp);
   hclose(hp);
-  free(webpage_getHTML(webpage1));
-  free(webpage1);
+  free(webpage_getHTML(seedURLpage));
+  free(seedURLpage);
   free(webpage2);
   free(webpage3);
   exit(EXIT_SUCCESS);
