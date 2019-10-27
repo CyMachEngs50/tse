@@ -1,4 +1,4 @@
-CFLAGS=	-Wall-pedantic-std=c11-|.-g
+CFLAGS:	-Wall-pedantic-std=c11-|.-g
 OFILES=	queue.o hash.o webpage.o pageio.o
 
 all:	$(OFILES)
@@ -8,7 +8,7 @@ all:	$(OFILES)
 	gcc $(CFLAGS) -c $<
 
 clean:
-	rm -f *.o
+	rm -f pageio.o
 
 
 
