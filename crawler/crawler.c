@@ -24,12 +24,14 @@ int res;
 int idx=1;
 int depth = 0;
 bool fetched;
-char *pagefromqueue;
+webpage_t *pagefromqueue;
 
 int32_t pagesave(webpage_t *pagep,int id, char *dirname);
 
-bool searchfn(const char *result, const char searchkey[10]){
-  if (strcmp(result, searchkey)==0){
+bool searchfn(void* pagep, const void* searchkey){
+   printf("entered searchfn\n");
+   if (strcmp(webpage_getURL((webpage_t*)pagep), (char*)searchkey)==0){
+     printf("compared true\n");
     return true;
   }
   else {
@@ -57,16 +59,13 @@ int main(int argc, char *argv[]){
   qp = qopen();
   hp = hopen(100); 
   seedwebpage = webpage_new(argv[1], depth, NULL);
-  int32_t p= qput(qp, (void*)seedwebpage);
-  int32_t p2= hput(hp, (void*)argv[1], argv[1], sizeof(argv[1]));
-  
-  /*if (argv[3] ==0){
-    fetched = webpage_fetch(seedURLpage);		      			       
-    pagesave(seedURLpage, idx, argv[2]);
-    }*/
-
+  int32_t p= qput(qp, (webpage_t*)seedwebpage);
+  int32_t p2= hput(hp, seedwebpage, argv[1], sizeof(argv[1]));
+  printf("put \n");
+   
   pagefromqueue=(webpage_t*)qget(qp);
   while (pagefromqueue != NULL){
+    printf("entered while loop");
     currwebpage =pagefromqueue;
     fetched = webpage_fetch(currwebpage);
     pagesave(currwebpage, idx, argv[2]);
@@ -74,11 +73,15 @@ int main(int argc, char *argv[]){
     depth = webpage_getDepth(currwebpage);
     printf (" %d \n", depth);
     if (depth < atoi(argv[3])){
+      printf("passed if condition");
       depth = depth + 1; 
       pos = 0;
       while((pos = webpage_getNextURL(currwebpage, pos, &result)) > 0){
+	printf("entered second while loop\n");
 	if(IsInternalURL(result)){
+	  printf("going into found\n");
 	   found = hsearch(hp, searchfn, result, sizeof(result));
+	   printf("found\n");
 	   if(found == NULL){  
 	    printf("internal url: %s\n", result);
 	    childwebpage = webpage_new(result, depth , NULL);
@@ -86,7 +89,7 @@ int main(int argc, char *argv[]){
 	    counter++;
 	    pagesave(childwebpage, idx, argv[2]);
 	    int32_t p= qput(qp, (void*)childwebpage);
-	    int32_t p2= hput(hp, (void*)result, result, sizeof(result));
+	    int32_t p2= hput(hp, (void*)childwebpage, result, sizeof(result));
 	    free(p);
 	    free(p2);
 	    free (result);
@@ -121,9 +124,9 @@ int main(int argc, char *argv[]){
 
 
 
-int32_t pagesave(webpage_t *pagep, int id, char *dirname){
+/*int32_t pagesave(webpage_t *pagep, int id, char *dirname){
 
-  const char pathname[60];
+  char *pathname[60];
   char *urlp= webpage_getURL(pagep);
   char *htmlp= webpage_getHTML(pagep);
   int depth= webpage_getDepth(pagep);
@@ -134,5 +137,4 @@ int32_t pagesave(webpage_t *pagep, int id, char *dirname){
   fprintf(fp, " %s\n %d\n %d\n %s", urlp, depth, HTMLlen, htmlp);
   fclose(fp);
 }
-
- 
+*/
