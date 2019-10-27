@@ -9,6 +9,7 @@
 #include "queue.h"
 #include "hash.h"
 #include "webpage.h"
+//#include "pageio.h"
 
 FILE *fp;
 char *urlp = "https://thayer.github.io/engs50/";
@@ -110,7 +111,7 @@ int main(int argc, char *argv[]){
 
 
 
-/*int32_t pagesave(webpage_t *pagep, int id, char *dirname){
+int32_t pagesave(webpage_t *pagep, int id, char *dirname){
 
   const char pathname[60];
   char *urlp= webpage_getURL(pagep);
@@ -123,5 +124,5 @@ int main(int argc, char *argv[]){
   fprintf(fp, " %s\n %d\n %d\n %s", urlp, depth, HTMLlen, htmlp);
   fclose(fp);
 }
-*/
+
  
