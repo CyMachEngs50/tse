@@ -1,4 +1,4 @@
-CFLAGS=	-Wall-pedantic-std=c11-|.-g
+CFLAGS:	-Wall-pedantic-std=c11-|.-g
 OFILES=	queue.o hash.o webpage.o pageio.o
 
 all:	$(OFILES)

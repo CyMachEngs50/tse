@@ -1,11 +1,11 @@
-#include pageio.h
 
-
+#include <inttypes.h>
+#include "pageio.h"
 
 
 int32_t pagesave(webpage_t *pagep, int id, char *dirname){
-
-  const char pathname[60];
+  FILE *fp;
+  char *pathname;
   char *urlp= webpage_getURL(pagep);
   char *htmlp= webpage_getHTML(pagep);
   int depth= webpage_getDepth(pagep);
