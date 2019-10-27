@@ -28,10 +28,15 @@ webpage_t *pagefromqueue;
 
 int32_t pagesave(webpage_t *pagep,int id, char *dirname);
 
+<<<<<<< HEAD
 bool searchfn(void* pagep, const void* searchkey){
    printf("entered searchfn\n");
    if (strcmp(webpage_getURL((webpage_t*)pagep), (char*)searchkey)==0){
      printf("compared true\n");
+=======
+bool searchfn(const void* pagep, const void* searchkey){
+  if (strcmp(webpage_getURL(pagep), searchkey)==0){
+>>>>>>> 838b086c90afd13a4751a38bedded8baef869d23
     return true;
   }
   else {
@@ -59,10 +64,17 @@ int main(int argc, char *argv[]){
   qp = qopen();
   hp = hopen(100); 
   seedwebpage = webpage_new(argv[1], depth, NULL);
+<<<<<<< HEAD
   int32_t p= qput(qp, (webpage_t*)seedwebpage);
   int32_t p2= hput(hp, seedwebpage, argv[1], sizeof(argv[1]));
   printf("put \n");
    
+=======
+  int32_t p= qput(qp, (void*)seedwebpage);
+  int32_t p2= hput(hp, seedwebpage, argv[1], sizeof(argv[1]));
+  
+
+>>>>>>> 838b086c90afd13a4751a38bedded8baef869d23
   pagefromqueue=(webpage_t*)qget(qp);
   while (pagefromqueue != NULL){
     printf("entered while loop");
@@ -71,12 +83,13 @@ int main(int argc, char *argv[]){
     pagesave(currwebpage, idx, argv[2]);
     idx++;
     depth = webpage_getDepth(currwebpage);
-    printf (" %d \n", depth);
+    printf ("%d \n", depth);
     if (depth < atoi(argv[3])){
       printf("passed if condition");
       depth = depth + 1; 
       pos = 0;
       while((pos = webpage_getNextURL(currwebpage, pos, &result)) > 0){
+<<<<<<< HEAD
 	printf("entered second while loop\n");
 	if(IsInternalURL(result)){
 	  printf("going into found\n");
@@ -99,16 +112,31 @@ int main(int argc, char *argv[]){
 	  printf("external url: %s\n", result);
 	  free (result);
 	}
+=======
+				if(IsInternalURL(result)){
+					found = hsearch(hp, searchfn, result, sizeof(result));
+					if(found == NULL){  
+						printf("internal url: %s\n", result);
+						childwebpage = webpage_new(result, depth , NULL);
+						fetched = webpage_fetch(childwebpage);
+						counter++;
+						pagesave(childwebpage, idx, argv[2]);
+						int32_t p= qput(qp, (void*)childwebpage);
+						int32_t p2= hput(hp, (void*)childwebpage, result, sizeof(result));
+						free(p);
+						free(p2);
+						free (result);
+					}
+				}
+				else{
+					printf("external url: %s\n", result);
+					free (result);
+				}
+>>>>>>> 838b086c90afd13a4751a38bedded8baef869d23
       }
     }
 		
-    /*printf("The urls that are in the queue: \n");
-      while(counter > 0){
-      printf("i//n queue: %s\n", (char*) qget(qp));
-      counter= counter -1;
-      }*/
-	 
-    pagefromqueue = (webpage_t*)qget(qp);
+		pagefromqueue = (webpage_t*)qget(qp);
     printf("url from queue: %s\n", webpage_getURL(pagefromqueue));
     counter= counter -1;
   }
@@ -118,7 +146,6 @@ int main(int argc, char *argv[]){
   free(webpage_getHTML(seedwebpage));
   free(seedwebpage);
   free(childwebpage);
-  free(currwebpage);
   exit(EXIT_SUCCESS);
 }
 
@@ -138,3 +165,7 @@ int main(int argc, char *argv[]){
   fclose(fp);
 }
 */
+<<<<<<< HEAD
+=======
+ 
+>>>>>>> 838b086c90afd13a4751a38bedded8baef869d23
