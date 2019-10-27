@@ -12,7 +12,7 @@
 
 FILE *fp;
 char *urlp = "https://thayer.github.io/engs50/";
-webpage_t *seedURLpage, *webpage2, *webpage3;
+webpage_t *seedwebpage, *currwebpage, *childwebpage;
 int pos=0;
 char *result;
 queue_t *qp;
@@ -24,12 +24,12 @@ int res;
 int idx=1;
 int depth = 0;
 bool fetched;
-char *URLfromqueue;
+char *pagefromqueue;
 
 int32_t pagesave(webpage_t *pagep,int id, char *dirname);
 
-bool searchfn(const webpage_t *pagep, const char searchkey[10]){
-  if (strcmp(webpage_getURL(pagep), searchkey)==0){
+bool searchfn(const char *result, const char searchkey[10]){
+  if (strcmp(result, searchkey)==0){
     return true;
   }
   else {
@@ -54,66 +54,68 @@ int main(int argc, char *argv[]){
     exit (EXIT_FAILURE);
   }
 
-	qp = qopen();
+  qp = qopen();
   hp = hopen(100); 
-  seedURLpage = webpage_new(argv[1], depth, NULL);
-  int32_t p= qput(qp, (void*)argv[1]);
-  int32_t p2= hput(hp, (void*)seedURLpage, argv[1], sizeof(argv[1]));
+  seedwebpage = webpage_new(argv[1], depth, NULL);
+  int32_t p= qput(qp, (void*)seedwebpage);
+  int32_t p2= hput(hp, (void*)argv[1], argv[1], sizeof(argv[1]));
   
   /*if (argv[3] ==0){
-  fetched = webpage_fetch(seedURLpage);		      			       
-  pagesave(seedURLpage, idx, argv[2]);
-  }*/
-	URLfromqueue = (char*)qget(qp); 
-	while (URLfromqueue != NULL){
-		webpage2 = webpage_new(URLfromqueue,depth , NULL);
-		fetched = webpage_fetch(webpage2);
-		pagesave(webpage2, idx, argv[2]);
-		idx++;
-		printf (" %d \n", depth);
-		if (depth < atoi(argv[3])){
-			depth = depth + 1;
-			pos = 0;
-			while((pos = webpage_getNextURL(webpage2, pos, &result)) > 0){
-				if(IsInternalURL(result)){
-					found = hsearch(hp, searchfn, result, sizeof(result)); 
-					 if(found == NULL){  
-						 printf("internal url: %s\n", result);
-						 webpage3 = webpage_new(result, depth , NULL);
-						 fetched = webpage_fetch(webpage3);
-						 counter++;
-						 pagesave(webpage3, idx, argv[2]);
-						 int32_t p= qput(qp, (void*)result);
-						 int32_t p2= hput(hp, (void*)webpage3, result, sizeof(result));
-						 free(p);
-						 free(p2);
-						 						 result = NULL;
-					 }
-				}
-				else{
-					printf("external url: %s\n", result);
-					free (result);
-				}
-			}
-		}
+    fetched = webpage_fetch(seedURLpage);		      			       
+    pagesave(seedURLpage, idx, argv[2]);
+    }*/
+
+  pagefromqueue=(webpage_t*)qget(qp);
+  while (pagefromqueue != NULL){
+    currwebpage =pagefromqueue;
+    fetched = webpage_fetch(currwebpage);
+    pagesave(currwebpage, idx, argv[2]);
+    idx++;
+    depth = webpage_getDepth(currwebpage);
+    printf (" %d \n", depth);
+    if (depth < atoi(argv[3])){
+      depth = depth + 1; 
+      pos = 0;
+      while((pos = webpage_getNextURL(currwebpage, pos, &result)) > 0){
+	if(IsInternalURL(result)){
+	   found = hsearch(hp, searchfn, result, sizeof(result));
+	   if(found == NULL){  
+	    printf("internal url: %s\n", result);
+	    childwebpage = webpage_new(result, depth , NULL);
+	    fetched = webpage_fetch(childwebpage);
+	    counter++;
+	    pagesave(childwebpage, idx, argv[2]);
+	    int32_t p= qput(qp, (void*)childwebpage);
+	    int32_t p2= hput(hp, (void*)result, result, sizeof(result));
+	    free(p);
+	    free(p2);
+	    free (result);
+	  }
+	}
+	else{
+	  printf("external url: %s\n", result);
+	  free (result);
+	}
+      }
+    }
 		
-		/*printf("The urls that are in the queue: \n");
-		while(counter > 0){
-			printf("in queue: %s\n", (char*) qget(qp));
-			counter= counter -1;
-			}*/
+    /*printf("The urls that are in the queue: \n");
+      while(counter > 0){
+      printf("i//n queue: %s\n", (char*) qget(qp));
+      counter= counter -1;
+      }*/
 	 
-		URLfromqueue = (char*)qget(qp);
-		printf("url from queue: %s\n", URLfromqueue);
-		counter= counter -1;
+    pagefromqueue = (webpage_t*)qget(qp);
+    printf("url from queue: %s\n", webpage_getURL(pagefromqueue));
+    counter= counter -1;
   }
 	
   qclose(qp);
   hclose(hp);
-  free(webpage_getHTML(seedURLpage));
-  free(seedURLpage);
-  free(webpage2);
-  free(webpage3);
+  free(webpage_getHTML(seedwebpage));
+  free(seedwebpage);
+  free(childwebpage);
+  free(currwebpage);
   exit(EXIT_SUCCESS);
 }
 
@@ -132,6 +134,5 @@ int32_t pagesave(webpage_t *pagep, int id, char *dirname){
   fprintf(fp, " %s\n %d\n %d\n %s", urlp, depth, HTMLlen, htmlp);
   fclose(fp);
 }
-
 
  
