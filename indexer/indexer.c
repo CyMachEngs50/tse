@@ -17,6 +17,22 @@
 #include "pageio.h"
 #include "webpage.h"
 
+
+typedef struct index{
+	hashtable *ht_words;
+	int htsize;
+}index_t;
+
+index_t *index_new(const int htsize){
+	index_t *index = malloc(sizeof(index_t)); 
+	index->ht_words = hashtable_new(htsize); 
+	index->htsize = htsize;
+	return index;
+}
+
+index_t index = index_new(200);
+
+
 bool Normalizeword(const char* word[20]){
 	bool status = true;
 	int valid_ext;
@@ -25,9 +41,7 @@ bool Normalizeword(const char* word[20]){
 
 	for(i=0; i<strln(word); i++){
 		word[i]= tolower(word[i]);
-	}
-
-	
+	}	
 }
 										
 int main (void){
@@ -40,8 +54,10 @@ int main (void){
 	webpage1= pageload(1, pages);
 	fetched= webpage_fetch(webpage1);
 	
-	while((pos = webpage_getNextword(webpage1,pos,$word)) > 0){
+	while((pos = webpage_getNextword(webpage1,pos,&word)) > 0){
+		Normalizeword(word);
 		printf(" %s\n", word);
+		free(word);
 	}
 	
 }
