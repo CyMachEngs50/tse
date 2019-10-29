@@ -44,8 +44,9 @@ int main(int argc, char *argv[]){
     exit(EXIT_FAILURE);
   }
   
-  res = access(argv[2], F_OK);
+  res = access(argv[2], X_OK);
   if (res != 0){
+		printf(" %d \n", res);
     printf("usage: crawler <seedurl> <pagedir> <maxdepth>\n");
     exit (EXIT_FAILURE);
   }
