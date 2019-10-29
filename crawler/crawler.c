@@ -6,10 +6,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
-#include "queue.h"
-#include "hash.h"
-#include "webpage.h"
-#include "pageio.h"
+#include <strings.h>
+
+#include <queue.h>
+#include <hash.h>
+#include <webpage.h>
+#include <pageio.h>
 
 FILE *fp;
 char *urlp = "https://thayer.github.io/engs50/";
@@ -29,7 +31,7 @@ webpage_t *pagefromqueue;
 
 int32_t pagesave(webpage_t *pagep,int id, char *dirname);
 
-bool searchfn(const void* pagep, const void* searchkey){
+bool searchfn(void* pagep, const void* searchkey){
   if (strcmp(webpage_getURL(pagep), searchkey)==0){
     return true;
   }
@@ -83,10 +85,11 @@ int main(int argc, char *argv[]){
 						fetched = webpage_fetch(childwebpage);
 						counter++;
 						pagesave(childwebpage, idx, argv[2]);
-						int32_t p= qput(qp, (void*)childwebpage);
-						int32_t p2= hput(hp, (void*)childwebpage, result, sizeof(result));
-						free(p);
-						free(p2);
+						p= qput(qp, (void*)childwebpage);
+						p2= hput(hp, (void*)childwebpage, result, sizeof(result));
+						if (p != 0 || p2 != 0){
+							exit(EXIT_FAILURE);
+						}
 						free (result);
 					}
 				}
@@ -111,19 +114,3 @@ int main(int argc, char *argv[]){
 }
 
 
-/*
-int32_t pagesave(webpage_t *pagep, int id, char *dirname){
-
-  const char pathname[60];
-  char *urlp= webpage_getURL(pagep);
-  char *htmlp= webpage_getHTML(pagep);
-  int depth= webpage_getDepth(pagep);
-  int HTMLlen= webpage_getHTMLlen(pagep);
-
-  sprintf(pathname, "%s%d",dirname, id);
-  fp=fopen(pathname, "w+");
-  fprintf(fp, " %s\n %d\n %d\n %s", urlp, depth, HTMLlen, htmlp);
-  fclose(fp);
-}
-
-*/ 

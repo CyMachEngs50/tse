@@ -10,18 +10,27 @@
  */
 
 #include <stdio.h>
-//#include "pageio.h"
-#include "webpage.c"
-#include "pageio.c"
+
+#include <webpage.h>
+#include <pageio.h>
 
 int main (void){
-	char* test= "../test";
-	char* pages= "../pages";
+	char* pages2= "../pages2/";
+	char* pages= "../pages/";
 	webpage_t *page;
+	bool fetched;
 
 	page= pageload(1, pages);
 	printf("loaded!\n");
-	pagesave(page, 2, pages);
+ 
+	fetched= webpage_fetch(page);
+	if (fetched == true){
+		pagesave(page, 2, pages2);
+	}
+	else{
+		printf("html not found\n");
+		exit(EXIT_FAILURE);
+	}
 	printf("saved!\n");  
 	exit(EXIT_SUCCESS);
 }

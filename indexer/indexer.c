@@ -39,7 +39,6 @@ int main (void){
 
 	webpage1= pageload(1, pages);
 	fetched= webpage_fetch(webpage1);
-	
 	while((pos = webpage_getNextword(webpage1,pos,$word)) > 0){
 		printf(" %s\n", word);
 	}

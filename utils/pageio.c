@@ -1,4 +1,4 @@
-/* pageio.c --- implements pagesave and pageload
+/* pageio.c --- implements phttpagesave and pageload
  * 
  * 
  * Author: Gregory G. Macharia & Cynthia Bundi
@@ -12,21 +12,26 @@
 
 #include <inttypes.h>
 #include <stdio.h>
-#include "pageio.h"
 
+#include <pageio.h>
+#include <queue.h>
+
+#define MAXCHAR 100
 
 int32_t pagesave(webpage_t *pagep, int id, char *dirname){
 	
-	const char pathname[60];                                              
+	char pathname[60];                                              
 	char *urlp= webpage_getURL(pagep);                               
-	char *htmlp= webpage_getHTML(pagep);                                           
+	char *htmlp= webpage_getHTML(pagep);
 	int depth= webpage_getDepth(pagep);                                         
 	int HTMLlen= webpage_getHTMLlen(pagep);
 	FILE *fp;
-	sprintf(pathname, "%s%d",dirname, id);                             
+	
+	sprintf(pathname, "%s%d",dirname, id);
 	fp=fopen(pathname, "w+");                                                     
-	fprintf(fp, " %s\n %d\n %d\n %s", urlp, depth, HTMLlen, htmlp);
-	fclose(fp);                                    
+	fprintf(fp, "%s%d\n%d\n%s", urlp, depth, HTMLlen, htmlp);
+	fclose(fp);
+	return 1;
 } 
 
 /*                                                                             
@@ -37,24 +42,42 @@ int32_t pagesave(webpage_t *pagep, int id, char *dirname){
  */                                                                                 
 webpage_t *pageload(int id, char *dirnm){
 
-	const char pathname[60];
+	char pathname[60];
+	char result [120];
 	FILE *fp;
 	webpage_t *loaded_webpage;
-	char URL;
-	int depth;
+	char URL[120];
+	int depth= 0;
+	int i, len;
+	char *urlp;
+
 	
 	sprintf(pathname, "%s%d",dirnm, id);
 	fp=fopen(pathname, "r+");
-	
-	//	printf("outside while\n");
-	while(fscanf(fp, " %s",)== 1){
-		//printf("inside while\n");
-		URL = fgets(id, 0, stdin);
-		//printf("fgets 1 \n");
-		depth = fgets(id, 1, stdin);
+
+	if (fp== NULL){
+		printf("no such file\n");
+		return NULL;
 	}
-	
-	loaded_webpage = webpage_new(URL,depth, NULL);
+	i=0;
+	while (i< 2){
+		fgets(result, 100, fp);
+		if (i== 0){
+			strcpy(URL, result);
+			len= strlen(URL   ) -1;
+				if (URL[len] == '\n'){
+				URL[len]= '\0';
+			}
+			urlp= URL;
+		}
+		if(i== 1){
+			depth= atoi(result);
+		}
+		i= i+1;
+	}
+
+	fclose(fp);
+	loaded_webpage = webpage_new(urlp,depth, NULL);
 	return loaded_webpage;
 	
 }

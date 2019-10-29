@@ -3,7 +3,7 @@ LIBS=-lutils -lcurl
 
 all: crawler pageiotest
 
-crawler:
+crawler: clean
 	gcc $(CFLAGS) crawler.c $(LIBS) -o $@
 
 pageiotest:
@@ -11,3 +11,4 @@ pageiotest:
 
 clean:
 	rm -f crawler pageiotest
+
