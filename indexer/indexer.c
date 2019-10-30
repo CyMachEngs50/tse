@@ -19,18 +19,42 @@
 
 
 typedef struct index{
-	hashtable *ht_words;
+	hashtable_t *htwords;
 	int htsize;
 }index_t;
 
+typedef struct wordcounter {
+    struct wordcounter *head;
+} wordcounter_t
+
 index_t *index_new(const int htsize){
 	index_t *index = malloc(sizeof(index_t)); 
-	index->ht_words = hashtable_new(htsize); 
+	index->htwords = hopen(htsize); 
 	index->htsize = htsize;
 	return index;
 }
 
+bool searchfn(const void* pagep, const void* searchkey){                       
+  if (strcmp(webpage_getNextWord(pagep), searchkey)==0){                       
+    return true;                                                               
+  }                                                                            
+  else {                                                                       
+    return false;                                                              
+  }                                                                            
+}      
+
 index_t index = index_new(200);
+
+if (index != NULL && word != NULL && id >= 0) {
+	wordcounter_t *word_count = hsearch(htwords,searchfn, wordsizeof(word));
+	if (word_count != NULL) {
+	}
+	else {
+
+
+	}
+ }
+
 
 
 bool Normalizeword(const char* word[20]){
@@ -53,13 +77,9 @@ int main (void){
 
 	webpage1= pageload(1, pages);
 	fetched= webpage_fetch(webpage1);
-<<<<<<< HEAD
-	while((pos = webpage_getNextword(webpage1,pos,$word)) > 0){
-=======
 	
 	while((pos = webpage_getNextword(webpage1,pos,&word)) > 0){
 		Normalizeword(word);
->>>>>>> 585455ecd965beddf1090d4d800efda5646941e9
 		printf(" %s\n", word);
 		free(word);
 	}
