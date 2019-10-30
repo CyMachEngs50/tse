@@ -16,7 +16,7 @@
 #include <unistd.h>
 #include "pageio.h"
 #include "webpage.h"
-
+#include "hash.h"
 
 typedef struct index{
 	hashtable_t *htwords;
@@ -24,8 +24,10 @@ typedef struct index{
 }index_t;
 
 typedef struct wordcounter {
-    struct wordcounter *head;
-} wordcounter_t
+	struct wordcounter *head;
+	struct wordcounter *next;
+	int wcount;
+} wordcounter_t;
 
 index_t *index_new(const int htsize){
 	index_t *index = malloc(sizeof(index_t)); 
@@ -35,7 +37,7 @@ index_t *index_new(const int htsize){
 }
 
 bool searchfn(const void* pagep, const void* searchkey){                       
-  if (strcmp(webpage_getNextWord(pagep), searchkey)==0){                       
+  if (strcmp(webpage_getNextWord(pagep,int pos,char word), searchkey)==0){                       
     return true;                                                               
   }                                                                            
   else {                                                                       
@@ -43,21 +45,26 @@ bool searchfn(const void* pagep, const void* searchkey){
   }                                                                            
 }      
 
-index_t index = index_new(200);
+index_t *index = index_new(200);
 
-if (index != NULL && word != NULL && id >= 0) {
-	wordcounter_t *word_count = hsearch(htwords,searchfn, wordsizeof(word));
-	if (word_count != NULL) {
+int wcount = 0;
+void Addindex(index_t *index, const char *word, const int id){
+	if (index != NULL && word != NULL && id >= 0) {
+		wordcounter_t *word_count = hsearch(htwords,searchfn, word, sizeof(word));
+		if (word_count == NULL) {
+			wordcounter_t *word_count = malloc(sizeof(wordcounter_t));
+        word_count = word_count->head;
+				wcount = 1;
+        return word_count;
+    }
 	}
 	else {
-
-
+		word_count = word_count->next;
+		wcount+=1;
 	}
- }
-
-
-
-bool Normalizeword(const char* word[20]){
+}
+/*
+bool Normalizeword(char *word[20]){
 	bool status = true;
 	int valid_ext;
 	int i;
@@ -67,7 +74,16 @@ bool Normalizeword(const char* word[20]){
 		word[i]= tolower(word[i]);
 	}	
 }
-										
+*/
+
+char *NormalizeWord (char *word){
+  if (word != NULL) {
+    for (char *w = word; *w != '\0'; w++)
+      *w = tolower(*w);
+  }
+  return word;
+}
+
 int main (void){
 	webpage_t* webpage1;
 	bool fetched;
@@ -80,6 +96,7 @@ int main (void){
 	
 	while((pos = webpage_getNextword(webpage1,pos,&word)) > 0){
 		Normalizeword(word);
+		Addindex(index, word, id);
 		printf(" %s\n", word);
 		free(word);
 	}
