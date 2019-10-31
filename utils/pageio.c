@@ -29,7 +29,7 @@ int32_t pagesave(webpage_t *pagep, int id, char *dirname){
 	
 	sprintf(pathname, "%s%d",dirname, id);
 	fp=fopen(pathname, "w+");                                                     
-	fprintf(fp, "%s%d\n%d\n%s", urlp, depth, HTMLlen, htmlp);
+	fprintf(fp, "%s\n%d\n%d\n%s", urlp, depth, HTMLlen, htmlp);
 	fclose(fp);
 	return 1;
 } 

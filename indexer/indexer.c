@@ -14,13 +14,13 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <unistd.h>
-#include "pageio.h"
-#include "webpage.h"
-#include "hash.h"
+#include <pageio.h>
+#include <webpage.h>
+#include <hash.h>
 
 int pos, id;
-char word;
-wordcounter_t word_count;
+char *word;
+//wordcounter_t word_count;
 hashtable_t *htwords;
 
 typedef struct index{
@@ -50,7 +50,7 @@ bool searchfn(const void* pagep, const void* searchkey){
   }                                                                            
 }      
 
-index_t *index = index_new(200);
+//index_t *index = index_new(200);
 
 int wcount = 0;
 
@@ -71,40 +71,49 @@ void Addindex(index_t *index, const char *word, const int id){
 	}
 	}
 }
-/*
-bool Normalizeword(char *word[20]){
-	bool status = true;
-	int valid_ext;
-	int i;
-	if 
 
-	for(i=0; i<strln(word); i++){
-		word[i]= tolower(word[i]);
-	}	
+bool NormalizeWord(char word[20]){
+	int i, isalpha;
+	bool result=false;
+	
+	if (word != NULL){
+		for(i=0; i<strlen(word); i++){
+			word[i]=	tolower(word[i]);
+		}
+		result=true;
+		if (strlen(word)< 3){
+			result= false;
+		}
+		for(i=0; i<strlen(word); i++){                                                            
+      isalpha=  isalpha(word[i]);
+			if (isalpha == 0){
+				result= false;
+			}
+    } 
+	}
+	return result;
 }
-*/
 
-char *NormalizeWord (char *word){
-  if (word != NULL) {
-    for (char *w = word; *w != '\0'; w++)
-      *w = tolower(*w);
-  }
-  return word;
-}
 
 int main (void){
-	webpage_t* webpage1;
-	bool fetched;
-	char* pages= "../pages/";
-
-	webpage1= pageload(1, pages);
-	fetched= webpage_fetch(webpage1);
+	webpage_t *webpage;
+	bool fetched, lowered;
+	char *pages= "../pages/";
 	
-	while((pos = webpage_getNextWord(webpage1,pos,&word)) > 0){
-		NormalizeWord(word);
-		Addindex(index, word, id);
-		printf(" %d\n", word);
-		free(word);
-	}
-	
+	webpage= pageload(1, pages);
+	fetched= webpage_fetch(webpage);
+	if (fetched == true){                                                                 
+		while((pos = webpage_getNextWord(webpage,pos,&word)) > 0){
+			lowered= NormalizeWord(word);
+			if(lowered){
+				/*  Addindex(index, word, id);*/
+				printf(" %s\n", word);
+			}
+			free(word);
+		} 
+	}                                                                                     
+  else{                                                                                 
+    printf("html not found\n");                                                         
+    exit(EXIT_FAILURE);                                                                 
+  }  
 }

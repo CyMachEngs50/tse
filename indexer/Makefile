@@ -3,7 +3,7 @@ LIBS=-lutils -lcurl
 
 all: indexer
 
-indexer:
+indexer: clean
 	gcc $(CFLAGS) indexer.c $(LIBS) -o $@
 
 clean:

@@ -10,7 +10,7 @@
  */
 
 #include <stdio.h>
-
+#include <stdbool.h>
 #include <webpage.h>
 #include <pageio.h>
 
