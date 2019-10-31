@@ -18,6 +18,11 @@
 #include "webpage.h"
 #include "hash.h"
 
+int pos, id;
+char word;
+wordcounter_t word_count;
+hashtable_t *htwords;
+
 typedef struct index{
 	hashtable_t *htwords;
 	int htsize;
@@ -29,7 +34,7 @@ typedef struct wordcounter {
 	int wcount;
 } wordcounter_t;
 
-index_t *index_new(const int htsize){
+index_t* index_new(const int htsize){
 	index_t *index = malloc(sizeof(index_t)); 
 	index->htwords = hopen(htsize); 
 	index->htsize = htsize;
@@ -37,7 +42,7 @@ index_t *index_new(const int htsize){
 }
 
 bool searchfn(const void* pagep, const void* searchkey){                       
-  if (strcmp(webpage_getNextWord(pagep,int pos,char word), searchkey)==0){                       
+  if (strcmp(webpage_getNextWord(pagep,pos,word), searchkey)==0){          
     return true;                                                               
   }                                                                            
   else {                                                                       
@@ -48,19 +53,22 @@ bool searchfn(const void* pagep, const void* searchkey){
 index_t *index = index_new(200);
 
 int wcount = 0;
+
 void Addindex(index_t *index, const char *word, const int id){
 	if (index != NULL && word != NULL && id >= 0) {
+		htwords = hopen(100);
 		wordcounter_t *word_count = hsearch(htwords,searchfn, word, sizeof(word));
 		if (word_count == NULL) {
 			wordcounter_t *word_count = malloc(sizeof(wordcounter_t));
-        word_count = word_count->head;
+			word_count = word_count->head;
 				wcount = 1;
         return word_count;
     }
-	}
-	else {
+		
+		else {
 		word_count = word_count->next;
 		wcount+=1;
+	}
 	}
 }
 /*
@@ -88,16 +96,14 @@ int main (void){
 	webpage_t* webpage1;
 	bool fetched;
 	char* pages= "../pages/";
-	char* word;
-	int pos=0;
 
 	webpage1= pageload(1, pages);
 	fetched= webpage_fetch(webpage1);
 	
-	while((pos = webpage_getNextword(webpage1,pos,&word)) > 0){
-		Normalizeword(word);
+	while((pos = webpage_getNextWord(webpage1,pos,&word)) > 0){
+		NormalizeWord(word);
 		Addindex(index, word, id);
-		printf(" %s\n", word);
+		printf(" %d\n", word);
 		free(word);
 	}
 	
